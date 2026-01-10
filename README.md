@@ -43,8 +43,8 @@ Lighthouse uses a dual-layer approach to clean the web:
 ## Future Roadmap
 
 * **Customizable Blur:** Let users choose the intensity of the background blur.
-* **Text-to-Speech Integration:** Highlighted text can be read aloud with a single shortcut.
-* **Dynamic Rule Updates:** Fetching community-maintained blocklists (like EasyList) to keep the ad blocker current.
+* **Selective Media Clarity:** Allows users to exempt specific images from blur effect
+* **Text-to-Speech Integration:** Highlighted text can be read aloud with simple shortcut.
 
 ---
 
