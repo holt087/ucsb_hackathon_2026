@@ -1,3 +1,5 @@
+// --- EXTRACT ---
+
 // 1. Try to grab the main article or post
 let mainElement = document.querySelector("article") || document.querySelector("#main") || document.querySelector(".post");
 
