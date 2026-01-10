@@ -48,3 +48,19 @@ hideAds();
 // Watch for dynamically added content
 const observer = new MutationObserver(hideAds);
 observer.observe(document.body, { childList: true, subtree: true });
+// 5. SEND TO THE BRAIN (The Bridge)
+if (extractedContent.text.length > 0) {
+    console.log("Sending text to AI Architect...");
+    
+    chrome.runtime.sendMessage({
+        action: "CLEAN_TEXT",      // Your Keyword
+        rawData: extractedContent.text // Your Variable
+    }, (response) => {
+        if (chrome.runtime.lastError) {
+            console.error("Error sending to background:", chrome.runtime.lastError);
+        } else if (response && response.status === "success") {
+            console.log("AI BRAIN SUCCESS:", response.data);
+            // Now the UI Specialist can use response.data to show the summary!
+        }
+    });
+}
