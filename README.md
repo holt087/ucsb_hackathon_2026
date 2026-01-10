@@ -1,4 +1,4 @@
-#### Lighthouse
+# Lighthouse
 Focus your eyes, filter the noise. A project for web accessibility and digital wellbeing.
 
 The Problem
@@ -7,7 +7,7 @@ The modern web is cluttered. For users with ADHD, visual processing disorders, o
 Our Solution:
 Lighthouse is a browser extension designed to create a "visual spotlight" for readers. It combines a unique hover-based focus effect with a seamless ad-blocking engine to transform any webpage into a distraction-free reading environment.
 
-### Key Features
+## Key Features
 
 * **Visual Spotlight:** Dynamically blurs background elements while highlighting the specific paragraph or text block under your cursor.
 * **Click-to-Zoom:** Instant magnification of content for better legibility without breaking the page layout.
