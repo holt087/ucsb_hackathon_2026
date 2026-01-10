@@ -1,7 +1,7 @@
 # Lighthouse
 Focus your eyes, filter the noise. A project for web accessibility and digital wellbeing.
 
-The Problem
+The Problem:
 The modern web is cluttered. For users with ADHD, visual processing disorders, or simply those experiencing "information overload," reading an article can be a sensory nightmare. Advertisements, sidebar popups, and dense walls of text make it difficult to maintain focus and track lines of text.
 
 Our Solution:
