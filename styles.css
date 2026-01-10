@@ -1,0 +1,148 @@
+/* Basic page styling */
+body {
+  margin: 0;
+  font-family: sans-serif;
+}
+
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: #333;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: top 0.3s ease;
+  z-index: 1000;
+}
+
+main, article {
+    margin-top: 20px; 
+}
+
+article {
+  max-width: 80%; 
+  margin: 0 auto;
+  padding: 20px;
+  line-height: 1.6;
+}
+
+article h1, article h2, article h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+/* Paragraph default */
+p {
+  transition: transform 0.3s ease, color 0.3s ease, opacity 0.3s ease;
+  cursor: pointer;
+}
+
+.focus-article {
+    margin-top: 80px;  /* space below header */
+    padding-top: 10px; /* buffer so first title is readable */
+}
+
+.focus-article h1,
+.focus-article h2,
+.focus-article h3 {
+    margin-top: 20px;      /* small spacing from top */
+    margin-bottom: 20px;   /* spacing before first paragraph */
+    text-align: left;      /* force left-aligned for consistency */
+    position: static;      /* ensure not fixed or absolute */
+    font-size: 2rem;
+    line-height: 1.4;
+}
+
+/* Paragraph hover inside article */
+.focus-article p {
+  opacity: 0.6;
+  margin-bottom: 16px;
+  position: static;      /* ensure no previous inline style overrides */
+  transform: none;       /* reset any JS hover transform when off */
+}
+
+
+/* Hover effect */
+.focus-article p.hovered {
+  opacity: 1;
+  transform: scale(1.05);
+  z-index: 1000;
+  position: relative;
+}
+
+/* Blur rest of article when hovering a paragraph */
+.focus-article.hover-active p:not(.hovered) {
+  filter: blur(3px);
+  /* Keep pointer-events so hover exit works */
+  pointer-events: auto;
+}
+
+/* Focus Mode (full Reader Mode) */
+body.focus-dimmed {
+  background-color: #f7f7f7;
+}
+
+/* Keep header always visible */
+body.focus-dimmed header,
+body.focus-dimmed nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 10000;
+}
+
+/* Center main article in Focus Mode */
+body.focus-dimmed .focus-article {
+  margin: 80px auto 50px auto; /* leave space for header */
+  max-width: 80%;
+  padding: 20px;
+  background-color: transparent;
+  z-index: 1000;
+}
+
+/* Blur everything else except article/header/nav in Focus Mode */
+body.focus-dimmed > *:not(.focus-article):not(header):not(nav) {
+  filter: blur(4px) brightness(0.7);
+  pointer-events: none;
+  user-select: none;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+/* Hover preview in Focus Mode */
+body.focus-dimmed .focus-article p {
+  opacity: 0.6;
+}
+
+body.focus-dimmed .focus-article p:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+/* Focused paragraph (clicked) */
+body.focus-dimmed .focus-article p.focused {
+  opacity: 1 !important;
+  font-size: 2rem;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20000;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #fff !important;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 80%;
+  line-height: 1.6;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Blur rest of page when paragraph is focused */
+body.focus-dimmed.focused-active > *:not(.focused):not(header):not(nav) {
+  filter: blur(5px);
+  pointer-events: none;
+  user-select: none;
+}
