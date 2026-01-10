@@ -16,3 +16,33 @@ const extractedContent = {
 
 // 4. Show it in the console
 console.log("Content for AI:", extractedContent);
+
+
+
+// --- Adblocker ---
+
+// content.js
+function hideAds() {
+    // List of common ad selectors
+    const selectors = [
+        'iframe[src*="doubleclick"]',
+        'iframe[src*="googlesyndication"]',
+        'iframe[src*="amazon-adsystem"]',
+        '[id^="ad-"]',          // IDs starting with "ad-"
+        '[class*="ad-"]',       // Classes containing "ad-"
+        '[class*="ads"]',       // Classes containing "ads"
+        '[data-ad]'             // Any element with data-ad attribute
+    ];
+
+    // Hide all matching elements
+    document.querySelectorAll(selectors.join(',')).forEach(el => {
+        el.style.display = 'none';
+    });
+}
+
+// Run immediately
+hideAds();
+
+// Watch for dynamically added content
+const observer = new MutationObserver(hideAds);
+observer.observe(document.body, { childList: true, subtree: true });
