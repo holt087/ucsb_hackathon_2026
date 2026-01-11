@@ -1,7 +1,4 @@
-// ==========================================
-// 1. AD-BLOCKING FUNCTIONALITY
-// ==========================================
-// Periodically scans the page for common ad selectors and removes them from the DOM
+// 1. Simple Ad Blocker
 const removeAds = () => {
     const selectors = ['.ad, .ads, .adsense, .ad-box, .ad-slot', '[id*="google_ads"]'];
     selectors.forEach(sel => document.querySelectorAll(sel).forEach(el => el.remove()));
@@ -9,44 +6,62 @@ const removeAds = () => {
 // Runs the ad-remover every 2 seconds to catch ads that load dynamically
 setInterval(removeAds, 2000);
 
-// ==========================================
-// 2. STATE & CONFIGURATION management
-// ==========================================
+// 2. Lighthouse Logic
 let isEnabled = true;      // Main switch for the extension
 let isBlurEnabled = true;  // Toggle for the background blur effect
 let blurAmount = 10;       // Intensity of the blur (in pixels)
 let zoomAmount = 1.0;      // How much to scale the focused element
 let currentTarget = null;  // Stores the element currently being focused
 
-// Load saved settings from Chrome's local storage
-chrome.storage.local.get(['lighthouseEnabled', 'blurEnabled', 'blurAmount', 'zoomAmount'], (res) => {
+// Initial state load
+chrome.storage.local.get(['lighthouseEnabled', 'blurEnabled', 'blurAmount'], (res) => {
     isEnabled = res.lighthouseEnabled !== false;
     isBlurEnabled = res.blurEnabled !== false;
     blurAmount = res.blurAmount !== undefined ? res.blurAmount : 10;
     zoomAmount = res.zoomAmount !== undefined ? res.zoomAmount : 1.0;
+    blurAmount = res.blurAmount || 12;
 });
 
-// ==========================================
-// 3. COMMUNICATION (Messages from Popup/UI)
-// ==========================================
-// Listens for changes made in the extension popup menu
+// Message listener from Popup
 chrome.runtime.onMessage.addListener((req) => {
-    if (req.action === "toggle") isEnabled = req.status;                  // Master ON/OFF
-    if (req.action === "toggleBlur") isBlurEnabled = req.status;          // Blur ON/OFF
-    if (req.action === "updateBlurAmount") blurAmount = req.status;       // Change blur px
+    if (req.action === "toggle") isEnabled = req.status;
+    if (req.action === "toggleBlur") isBlurEnabled = req.status;
+    if (req.action === "updateBlurAmount") blurAmount = req.status;
     if (req.action === "updateZoomAmount") zoomAmount = req.status;       // Change zoom scale
-    
+
+
+    // ✅ ADD THESE
+    if (req.action === "setBg") {
+        document.documentElement.style.backgroundColor = req.color;
+        document.body.style.backgroundColor = req.color;
+    }
+
+    if (req.action === "setText") {
+        document.documentElement.style.color = req.color;
+        document.body.style.color = req.color;
+
+        document.querySelectorAll('p, span, li, a, h1, h2, h3, h4').forEach(el => {
+            el.style.color = req.color;
+        });
+    }
+
     if (!isEnabled) {
-        clearLighthouse(); // Clean up styles if disabled
+        clearLighthouse();
     } else if (currentTarget) {
-        updateLiveStyles(); // Apply new settings immediately to active focus
+        updateLiveStyles();
+
     }
 });
 
-// ==========================================
-// 4. STYLE APPLICATION
-// ==========================================
-// Injects the current settings into CSS variables used by the stylesheet
+function updateLiveStyles() {
+    if (isBlurEnabled) {
+        document.body.classList.add('lh-blur-on');
+        document.documentElement.style.setProperty('--lh-blur-size', blurAmount + 'px');
+    } else {
+        document.body.classList.remove('lh-blur-on');
+    }
+}
+
 function updateLiveStyles() {
     document.documentElement.style.setProperty('--lh-zoom-level', zoomAmount);
     document.documentElement.style.setProperty('--lh-blur-size', blurAmount + 'px');
@@ -59,9 +74,6 @@ function updateLiveStyles() {
     }
 }
 
-// ==========================================
-// 5. HOVER DETECTION (The "Lighthouse" Logic)
-// ==========================================
 document.addEventListener('mouseover', (e) => {
     if (!isEnabled) return;
     
@@ -101,10 +113,6 @@ document.addEventListener('mouseover', (e) => {
     }
 });
 
-// ==========================================
-// 6. EXIT DETECTION
-// ==========================================
-// Removes the focus if the mouse moves too far away from the active element
 document.addEventListener('mousemove', (e) => {
     if (currentTarget) {
         const rect = currentTarget.getBoundingClientRect();
