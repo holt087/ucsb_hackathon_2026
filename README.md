@@ -23,8 +23,7 @@ Lighthouse uses a dual-layer approach to clean the web:
 ## Project Structure
 
 ```text
-├── manifest.json   # Extension configuration & ad-blocking permissions
-├── rules.json      # The "Shield" - network filtering rules
+├── manifest.json   # Extension configuration
 ├── code.js         # The "Lighthouse" - hover logic & element hider
 ├── styles.css      # The "Atmosphere" - blur and highlight effects
 ├── popup.html      # User interface & toggles
@@ -42,7 +41,6 @@ Lighthouse uses a dual-layer approach to clean the web:
 
 ## Future Roadmap
 
-* **Customizable Blur:** Let users choose the intensity of the background blur.
 * **Selective Media Clarity:** Allows users to exempt specific images from blur effect
 * **Text-to-Speech Integration:** Highlighted text can be read aloud with simple shortcut.
 
