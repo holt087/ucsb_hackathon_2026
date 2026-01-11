@@ -2,7 +2,6 @@
 <html>
 <head>
     <link rel="stylesheet" href="styles.css">
-
     <style>
         body { width: 210px; font-family: -apple-system, system-ui, sans-serif; padding: 16px; background: #fff; color: #1a1a1a; }
         .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
@@ -21,6 +20,7 @@
         input:checked + .slider-bg:before { transform: translateX(22px); }
         .setting-row { display: flex; justify-content: space-between; align-items: center; }
         .range-slider { width: 100%; margin-top: 4px; cursor: pointer; }
+        .font-select { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #e9ecef; background: #f8f9fa; font-size: 12px; cursor: pointer; outline: none; margin-top: 4px; }
         .footer { border-top: 1px solid #f1f3f5; padding-top: 10px; text-align: center; }
         .tagline { font-size: 11px; color: #228be6; font-weight: 600; cursor: pointer; }
     </style>
@@ -65,17 +65,26 @@
             <input type="range" id="blurSlider" class="range-slider" min="0" max="40" value="10">
         </div>
 
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+            <span style="font-size: 13px; font-weight: 500;">Reading Font</span>
+            <select id="fontSelect" class="font-select">
+                <option value="Arial, sans-serif">Arial (Default)</option>
+                <option value="'OpenDyslexicLocal', sans-serif">Open Dyslexic</option>
+                <option value="'Calibri', sans-serif">Calibri</option> <option value="'Georgia', serif">Georgia</option>
+                <option value="'Verdana', sans-serif">Verdana</option>
+                <option value="'Times New Roman', serif">Times New Roman</option>
+                <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                <option value="'Comic Sans MS', cursive">Comic Sans</option>
+                <option value="'Courier New', monospace">Courier New</option>
+            </select>
+        </div>
 
         <div class="color-picker">
-           <!-- Background color -->
            <div class="color-btn-container">
                <div class="color-btn-title">Background</div>
                <button class="color-btn" id="bg-btn" title="Background"></button>
                <input type="color" id="bg-color" value="#ffffff" style="display:none;">
            </div>
-
-
-           <!-- Text color -->
            <div class="color-btn-container">
                <div class="color-btn-title">Text</div>
                <button class="color-btn" id="text-btn" title="Text"></button>
@@ -83,12 +92,9 @@
            </div>
        </div>
 
-
-       <!-- Reset button -->
        <div style="margin-top: 8px; text-align: center;">
            <button id="reset-colors" style="padding: 6px 12px; font-size: 12px; border-radius: 6px; cursor: pointer;">Reset Colors</button>
        </div>
-
 
         <div class="footer">
             <div class="tagline" id="resetBtn">Reset to Default</div>
