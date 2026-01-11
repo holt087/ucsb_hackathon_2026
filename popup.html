@@ -2,23 +2,36 @@
 <html>
 <head>
     <style>
+        /* Basic window styling: sets width to 210px so the popup looks like a small card */
         body { width: 210px; font-family: -apple-system, system-ui, sans-serif; padding: 16px; background: #fff; color: #1a1a1a; }
+        
+        /* Header styling: aligns the logo and the "Active/Inactive" pill */
         .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
         .logo-box { display: flex; align-items: center; }
         .logo-img { width: 28px; height: 28px; object-fit: contain; }
         .logo-text { font-weight: 800; letter-spacing: -0.5px; font-size: 15px; margin-left: 8px; }
+        
+        /* Status Pill: The green/red badge that shows if the app is on */
         .status-pill { font-size: 9px; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; font-weight: bold; }
         .active-pill { background: #e6fcf5; color: #0ca678; }
         .inactive-pill { background: #fff5f5; color: #fa5252; }
+        
+        /* Layout container for all the settings rows */
         .container { display: flex; flex-direction: column; gap: 14px; }
+        
+        /* Custom Toggle Switch (The ON/OFF sliding buttons) */
         .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider-bg { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e9ecef; transition: .3s; border-radius: 22px; }
         .slider-bg:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        input:checked + .slider-bg { background-color: #228be6; }
-        input:checked + .slider-bg:before { transform: translateX(22px); }
+        input:checked + .slider-bg { background-color: #228be6; } /* Blue color when ON */
+        input:checked + .slider-bg:before { transform: translateX(22px); } /* Moves the circle when clicked */
+        
+        /* Row styling for labels and switches */
         .setting-row { display: flex; justify-content: space-between; align-items: center; }
         .range-slider { width: 100%; margin-top: 4px; cursor: pointer; }
+        
+        /* Bottom section with the reset button */
         .footer { border-top: 1px solid #f1f3f5; padding-top: 10px; text-align: center; }
         .tagline { font-size: 11px; color: #228be6; font-weight: 600; cursor: pointer; }
     </style>
@@ -31,6 +44,7 @@
         </div>
         <span id="pill" class="status-pill active-pill">Active</span>
     </div>
+
     <div class="container">
         <div class="setting-row">
             <span style="font-size: 13px; font-weight: 500;">Focus Mode</span>
@@ -39,6 +53,7 @@
                 <span class="slider-bg"></span>
             </label>
         </div>
+
         <div class="setting-row">
             <span style="font-size: 13px; font-weight: 500;">Background Blur</span>
             <label class="switch">
@@ -62,10 +77,12 @@
             </div>
             <input type="range" id="blurSlider" class="range-slider" min="0" max="40" value="10">
         </div>
+
         <div class="footer">
             <div class="tagline" id="resetBtn">Reset to Default</div>
         </div>
     </div>
+
     <script src="popup.js"></script>
 </body>
 </html>
