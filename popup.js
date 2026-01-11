@@ -2,15 +2,28 @@ const toggleBtn = document.getElementById('toggleBtn');
 const blurBtn = document.getElementById('blurBtn');
 const blurSlider = document.getElementById('blurSlider');
 const blurValText = document.getElementById('blurVal');
+const zoomSlider = document.getElementById('zoomSlider');
+const zoomValText = document.getElementById('zoomVal');
+const resetBtn = document.getElementById('resetBtn');
 const pill = document.getElementById('pill');
 
-chrome.storage.local.get(['lighthouseEnabled', 'blurEnabled', 'blurAmount'], (res) => {
+const DEFAULT_BLUR = 10;
+const DEFAULT_ZOOM = 1.0;
+
+// Load values
+chrome.storage.local.get(['lighthouseEnabled', 'blurEnabled', 'blurAmount', 'zoomAmount'], (res) => {
     const isEn = res.lighthouseEnabled !== false;
     toggleBtn.checked = isEn;
     blurBtn.checked = res.blurEnabled !== false;
-    const amount = res.blurAmount || 12;
-    blurSlider.value = amount;
-    blurValText.innerText = amount + "px";
+    
+    const bAmount = res.blurAmount !== undefined ? res.blurAmount : DEFAULT_BLUR;
+    blurSlider.value = bAmount;
+    blurValText.innerText = bAmount + "px";
+
+    const zAmount = res.zoomAmount !== undefined ? res.zoomAmount : DEFAULT_ZOOM;
+    zoomSlider.value = zAmount;
+    zoomValText.innerText = Number(zAmount).toFixed(2) + "x";
+
     updatePill(isEn);
 });
 
@@ -32,6 +45,24 @@ blurSlider.addEventListener('input', () => {
     sendMsg("updateBlurAmount", val);
 });
 
+zoomSlider.addEventListener('input', () => {
+    const val = zoomSlider.value;
+    zoomValText.innerText = Number(val).toFixed(2) + "x";
+    chrome.storage.local.set({ zoomAmount: val });
+    sendMsg("updateZoomAmount", val);
+});
+
+resetBtn.addEventListener('click', () => {
+    zoomSlider.value = DEFAULT_ZOOM;
+    zoomValText.innerText = DEFAULT_ZOOM.toFixed(2) + "x";
+    blurSlider.value = DEFAULT_BLUR;
+    blurValText.innerText = DEFAULT_BLUR + "px";
+    
+    chrome.storage.local.set({ zoomAmount: DEFAULT_ZOOM, blurAmount: DEFAULT_BLUR });
+    sendMsg("updateZoomAmount", DEFAULT_ZOOM);
+    sendMsg("updateBlurAmount", DEFAULT_BLUR);
+});
+
 function updatePill(isEn) {
     pill.innerText = isEn ? "Active" : "Inactive";
     pill.className = isEn ? "status-pill active-pill" : "status-pill inactive-pill";
@@ -39,6 +70,8 @@ function updatePill(isEn) {
 
 function sendMsg(action, status) {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (tabs[0]) chrome.tabs.sendMessage(tabs[0].id, { action, status });
+        if (tabs[0]) {
+            chrome.tabs.sendMessage(tabs[0].id, { action, status }).catch(e => {});
+        }
     });
 }
