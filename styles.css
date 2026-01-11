@@ -1,3 +1,11 @@
+/* ADDED: Local font definition for OpenDyslexic */
+@font-face {
+    font-family: 'OpenDyslexicLocal';
+    src: url('chrome-extension://__MSG_@@extension_id__/OpenDyslexic-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 /* Base shared highlight styles (The overlay/spotlight) */
 .lh-highlight, .lh-img-highlight {
     position: relative !important;
@@ -14,6 +22,10 @@
     padding: 35px !important;
     width: 100% !important;
     box-sizing: border-box !important;
+    
+    /* UPDATED: Added font variable mapping */
+    font-family: var(--lh-font, Arial, sans-serif) !important;
+    
     font-size: 1.4em !important;
     line-height: 1.6 !important;
     border-radius: 12px !important;
@@ -162,7 +174,3 @@ body.lh-blur-on .lh-img-highlight::before {
 #reset-colors:hover {
    background-color: #1c7ed6;   /* darker blue on hover */
 }
-
-
-
-
