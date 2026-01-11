@@ -1,6 +1,14 @@
-.lh-highlight {
+/* Base shared highlight styles (The overlay/spotlight) */
+.lh-highlight, .lh-img-highlight {
     position: relative !important;
     z-index: 1000000 !important;
+    box-shadow: 0 0 40px 5000px rgba(0, 0, 0, 0.7) !important;
+    transform: scale(var(--lh-zoom-level, 1.0)) !important;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Specific styling for Text */
+.lh-highlight {
     background-color: var(--lh-bg) !important;
     color: var(--lh-text) !important;
     padding: 35px !important;
@@ -9,25 +17,35 @@
     font-size: 1.4em !important;
     line-height: 1.6 !important;
     border-radius: 12px !important;
-    transform: scale(1.02);
-    transition: transform 0.3s ease;
-    
-    /* Distinct spotlight border */
-    box-shadow: 0 0 40px 5000px rgba(0, 0, 0, 0.6) !important;
 }
 
-/* Background Blur Layer */
-body.lh-blur-on .lh-highlight::before {
+/* Specific styling for Images: Rigid lines and Outside Outline */
+.lh-img-highlight {
+    /* Rigid square lines */
+    border: 4px solid #228be6 !important; 
+    border-radius: 0px !important; 
+    
+    /* Outside outline with a gap */
+    outline: 2px solid #ffffff !important;
+    outline-offset: 6px !important;
+    
+    background-color: transparent !important;
+    object-fit: contain !important;
+}
+
+/* Blur logic for both */
+body.lh-blur-on .lh-highlight::before, 
+body.lh-blur-on .lh-img-highlight::before {
     content: "";
     position: fixed;
     top: -5000px; left: -5000px; right: -5000px; bottom: -5000px;
     z-index: -1 !important;
-    backdrop-filter: blur(var(--lh-blur-size, 12px)) !important;
-    -webkit-backdrop-filter: blur(var(--lh-blur-size, 12px)) !important;
+    backdrop-filter: blur(var(--lh-blur-size, 10px)) !important;
+    -webkit-backdrop-filter: blur(var(--lh-blur-size, 10px)) !important;
     pointer-events: none;
 }
 
-.lh-highlight * {
+.lh-highlight *, .lh-img-highlight * {
     position: relative;
     z-index: 1000001;
     filter: none !important;
