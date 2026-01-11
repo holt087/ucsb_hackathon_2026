@@ -4,14 +4,21 @@ const blurSlider = document.getElementById('blurSlider');
 const blurValText = document.getElementById('blurVal');
 const zoomSlider = document.getElementById('zoomSlider');
 const zoomValText = document.getElementById('zoomVal');
+const fontSelect = document.getElementById('fontSelect');
 const resetBtn = document.getElementById('resetBtn');
 const pill = document.getElementById('pill');
 
+const bgBtn = document.getElementById('bg-btn');
+const textBtn = document.getElementById('text-btn');
+const bgInput = document.getElementById('bg-color');
+const textInput = document.getElementById('text-color');
+const resetColors = document.getElementById('reset-colors');
+
 const DEFAULT_BLUR = 10;
 const DEFAULT_ZOOM = 1.0;
+const DEFAULT_FONT = 'Arial, sans-serif';
 
-// Load values
-chrome.storage.local.get(['lighthouseEnabled', 'blurEnabled', 'blurAmount', 'zoomAmount'], (res) => {
+chrome.storage.local.get(['lighthouseEnabled', 'blurEnabled', 'blurAmount', 'zoomAmount', 'activeFont'], (res) => {
     const isEn = res.lighthouseEnabled !== false;
     toggleBtn.checked = isEn;
     blurBtn.checked = res.blurEnabled !== false;
@@ -24,7 +31,16 @@ chrome.storage.local.get(['lighthouseEnabled', 'blurEnabled', 'blurAmount', 'zoo
     zoomSlider.value = zAmount;
     zoomValText.innerText = Number(zAmount).toFixed(2) + "x";
 
+    const font = res.activeFont || DEFAULT_FONT;
+    if (fontSelect) fontSelect.value = font;
+
     updatePill(isEn);
+});
+
+fontSelect.addEventListener('change', () => {
+    const font = fontSelect.value;
+    chrome.storage.local.set({ activeFont: font });
+    sendMsg("updateFont", font);
 });
 
 toggleBtn.addEventListener('change', () => {
@@ -52,15 +68,39 @@ zoomSlider.addEventListener('input', () => {
     sendMsg("updateZoomAmount", val);
 });
 
+const updateColor = (input, btn, action) => {
+    btn.style.backgroundColor = input.value;
+    sendMsg(action, input.value);
+};
+
+bgBtn.onclick = () => bgInput.click();
+textBtn.onclick = () => textInput.click();
+bgInput.oninput = () => updateColor(bgInput, bgBtn, 'setBg');
+textInput.oninput = () => updateColor(textInput, textBtn, 'setText');
+
+resetColors.onclick = () => {
+    bgInput.value = '#ffffff';
+    textInput.value = '#000000';
+    updateColor(bgInput, bgBtn, 'setBg');
+    updateColor(textInput, textBtn, 'setText');
+};
+
 resetBtn.addEventListener('click', () => {
     zoomSlider.value = DEFAULT_ZOOM;
     zoomValText.innerText = DEFAULT_ZOOM.toFixed(2) + "x";
     blurSlider.value = DEFAULT_BLUR;
     blurValText.innerText = DEFAULT_BLUR + "px";
+    if (fontSelect) fontSelect.value = DEFAULT_FONT;
     
-    chrome.storage.local.set({ zoomAmount: DEFAULT_ZOOM, blurAmount: DEFAULT_BLUR });
+    chrome.storage.local.set({ 
+        zoomAmount: DEFAULT_ZOOM, 
+        blurAmount: DEFAULT_BLUR,
+        activeFont: DEFAULT_FONT 
+    });
+
     sendMsg("updateZoomAmount", DEFAULT_ZOOM);
     sendMsg("updateBlurAmount", DEFAULT_BLUR);
+    sendMsg("updateFont", DEFAULT_FONT);
 });
 
 function updatePill(isEn) {
@@ -71,94 +111,11 @@ function updatePill(isEn) {
 function sendMsg(action, status) {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs[0]) {
-            chrome.tabs.sendMessage(tabs[0].id, { action, status }).catch(e => {});
+            chrome.tabs.sendMessage(tabs[0].id, { 
+                action: action, 
+                status: status, 
+                color: status 
+            }).catch(e => {});
         }
     });
 }
-
-
-
-///-------------------------------
-
-document.addEventListener('DOMContentLoaded', () => {
-   // Helper to get element by ID
-   const el = id => document.getElementById(id);
-   const send = msg =>
-  chrome.tabs.query({ active:true, currentWindow:true }, t => {
-    console.log("POPUP sending:", msg, "to tab", t[0]?.id);
-    if (t[0]) chrome.tabs.sendMessage(t[0].id, msg);
-  });
-
-
-
-   // DOM elements
-   const toggle = el('toggleBtn'),
-         blur = el('blurBtn'),
-         slider = el('blurSlider'),
-         val = el('blurVal'),
-         pill = el('pill'),
-         bgBtn = el('bg-btn'),
-         textBtn = el('text-btn'),
-         bgInput = el('bg-color'),
-         textInput = el('text-color'),
-         reset = el('reset-colors');
-
-
-   // Load saved state
-   chrome.storage.local.get(['lighthouseEnabled','blurEnabled','blurAmount'], r => {
-       toggle.checked = r.lighthouseEnabled !== false;
-       blur.checked = r.blurEnabled !== false;
-       slider.value = r.blurAmount || 12;
-       val.innerText = slider.value + 'px';
-       pill.innerText = toggle.checked ? 'Active' : 'Inactive';
-       pill.className = toggle.checked ? 'status-pill active-pill' : 'status-pill inactive-pill';
-       bgBtn.style.backgroundColor = bgInput.value;
-       textBtn.style.backgroundColor = textInput.value;
-   });
-
-
-   // Helpers
-   const updatePill = () => {
-       pill.innerText = toggle.checked ? 'Active' : 'Inactive';
-       pill.className = toggle.checked ? 'status-pill active-pill' : 'status-pill inactive-pill';
-   };
-   const updateColor = (input, btn, action) => {
-       btn.style.backgroundColor = input.value;
-       send({ action, color: input.value });
-   };
-
-
-   // Toggle & blur
-   toggle.addEventListener('change', () => {
-       updatePill();
-       chrome.storage.local.set({ lighthouseEnabled: toggle.checked });
-       send({ action: 'toggle', status: toggle.checked });
-   });
-   blur.addEventListener('change', () => {
-       chrome.storage.local.set({ blurEnabled: blur.checked });
-       send({ action: 'toggleBlur', status: blur.checked });
-   });
-   slider.addEventListener('input', () => {
-       val.innerText = slider.value + 'px';
-       chrome.storage.local.set({ blurAmount: slider.value });
-       send({ action: 'updateBlurAmount', status: slider.value });
-   });
-
-
-   // Color pickers
-   bgBtn.onclick = () => bgInput.click();
-   textBtn.onclick = () => textInput.click();
-   bgInput.oninput = () => updateColor(bgInput, bgBtn, 'setBg');
-   textInput.oninput = () => updateColor(textInput, textBtn, 'setText');
-
-
-   // Reset button
-   reset.onclick = () => {
-       bgInput.value = '#ffffff';
-       textInput.value = '#000000';
-       updateColor(bgInput, bgBtn, 'setBg');
-       updateColor(textInput, textBtn, 'setText');
-   };
-});
-
-
