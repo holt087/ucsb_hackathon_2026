@@ -1,4 +1,8 @@
 // 1. Simple Ad Blocker
+let locked = false;
+
+let lockedTarget = null;
+
 const removeAds = () => {
     const selectors = ['.ad, .ads, .adsense, .ad-box, .ad-slot', '[id*="google_ads"]'];
     selectors.forEach(sel => document.querySelectorAll(sel).forEach(el => el.remove()));
@@ -42,6 +46,7 @@ function updateLiveStyles() {
 
 document.addEventListener('mouseover', (e) => {
     if (!isEnabled) return;
+    if (locked) return;
     const target = e.target.closest('p');
     
     if (target && target !== currentTarget && target.innerText.length > 20) {
@@ -58,12 +63,15 @@ document.addEventListener('mouseover', (e) => {
         target.style.setProperty('--lh-bg', bgColor);
         target.style.setProperty('--lh-text', style.color);
         target.classList.add('lh-highlight');
+        currentTarget = target;
+
         
         updateLiveStyles();
     }
 });
 
 document.addEventListener('mousemove', (e) => {
+    if(locked) return;
     if (currentTarget) {
         const rect = currentTarget.getBoundingClientRect();
         const buffer = 60;
@@ -75,9 +83,36 @@ document.addEventListener('mousemove', (e) => {
 });
 
 function clearLighthouse() {
+    if (locked) return;
     if (currentTarget) {
         currentTarget.classList.remove('lh-highlight');
         currentTarget = null;
     }
     document.body.classList.remove('lh-blur-on');
 }
+
+document.addEventListener("click", (e) => {
+    if (!isEnabled || !currentTarget) return;
+
+    locked = !locked;
+
+    if (locked) {
+        lockedTarget = currentTarget;
+        lockedTarget.classList.add("lh-locked");
+    } else {
+        lockedTarget?.classList.remove("lh-locked");
+        lockedTarget = null;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+}, true);
+
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && locked) {
+        locked = false;
+        lockedTarget?.classList.remove("lh-locked");
+        lockedTarget = null;
+    }
+});
+
