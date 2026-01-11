@@ -24,13 +24,16 @@ let isEnabled = true;
 let isBlurEnabled = true;
 let blurAmount = 10; 
 let zoomAmount = 1.0;
+let activeFont = 'Arial, sans-serif'; // ADDED: Font state
 let currentTarget = null;
 
-chrome.storage.local.get(['lighthouseEnabled', 'blurEnabled', 'blurAmount', 'zoomAmount'], (res) => {
+// Updated storage retrieval to include activeFont
+chrome.storage.local.get(['lighthouseEnabled', 'blurEnabled', 'blurAmount', 'zoomAmount', 'activeFont'], (res) => {
     isEnabled = res.lighthouseEnabled !== false;
     isBlurEnabled = res.blurEnabled !== false;
     blurAmount = res.blurAmount !== undefined ? res.blurAmount : 10;
     zoomAmount = res.zoomAmount !== undefined ? res.zoomAmount : 1.0;
+    activeFont = res.activeFont || 'Arial, sans-serif'; // ADDED
     if (isEnabled) {
     ensureProgressBar();
     updateProgress();
@@ -66,6 +69,7 @@ chrome.runtime.onMessage.addListener((req) => {
   if (req.action === "toggleBlur") isBlurEnabled = req.status;
   if (req.action === "updateBlurAmount") blurAmount = req.status;
   if (req.action === "updateZoomAmount") zoomAmount = req.status;
+  if (req.action === "updateFont") activeFont = req.status; // ADDED
 
   if (!isEnabled) {
     clearLighthouse();
@@ -77,14 +81,14 @@ chrome.runtime.onMessage.addListener((req) => {
   }
 });
 
-
-
+// Consolidating redundant listener logic while preserving your updateFont integration
 chrome.runtime.onMessage.addListener((req) => {
     console.log("CONTENT got message:", req);
     if (req.action === "toggle") isEnabled = req.status;
     if (req.action === "toggleBlur") isBlurEnabled = req.status;
     if (req.action === "updateBlurAmount") blurAmount = req.status;
     if (req.action === "updateZoomAmount") zoomAmount = req.status;
+    if (req.action === "updateFont") activeFont = req.status; // ADDED
     
     if (!isEnabled) {
         clearLighthouse();
@@ -101,6 +105,7 @@ chrome.runtime.onMessage.addListener((req) => {
 function updateLiveStyles() {
     document.documentElement.style.setProperty('--lh-zoom-level', zoomAmount);
     document.documentElement.style.setProperty('--lh-blur-size', blurAmount + 'px');
+    document.documentElement.style.setProperty('--lh-font', activeFont); // ADDED
 
     if (isBlurEnabled && isEnabled) {
         document.body.classList.add('lh-blur-on');
@@ -229,8 +234,6 @@ function updateProgress() {
   const bar = document.getElementById("lh-progress-bar");
   if (bar) bar.style.width = pct.toFixed(1) + "%";
 }
-
-
 
 
 document.addEventListener("click", (e) => {
