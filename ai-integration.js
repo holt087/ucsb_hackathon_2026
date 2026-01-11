@@ -1,36 +1,54 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-// 1. Initialize the API (Put your key here from Google AI Studio)
-const API_KEY = "AIzaSyAzSn58qyKg0ikPYUHNqcc0x7tqORVncZA";
-const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-// 2. The main function to clean the text
+// ai-integration.js
 export async function processArticle(rawText) {
-  const prompt = `
-    You are an ADHD Focus Assistant. 
-    I will provide raw text from a webpage. 
-    1. Remove all ads, "click here", and related link text.
-    2. Extract the core story or educational content.
-    3. Return it as a simple list of clear, bold points.
-    
-    Text to process: ${rawText}
-  `;
+  const API_KEY = "AIzaSyB3Tq1WH-P6wZ31kk9x6OziTwz4qWi3RY0"; // (don't ship this long-term)
+  const MODEL_NAME = "models/gemini-flash-latest"; 
+  // or "models/gemini-2.5-flash" / "models/gemini-2.0-flash-lite"
 
-  try {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text(); 
-  } catch (error) {
-    console.error("Gemini Error:", error);
-    return "Error processing text.";
-  }
+  // NOTE: MODEL_NAME already includes "models/..."
+  const API_URL = `https://generativelanguage.googleapis.com/v1beta/${MODEL_NAME}:generateContent`;
+
+  const response = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": API_KEY,
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: `
+Rewrite the following content for ADHD readability.
+
+Return HTML ONLY with this structure:
+<h1>Title</h1>
+<h2>Key takeaways</h2>
+<ul><li>...</li></ul>
+<h2>Clean version</h2>
+Use short paragraphs (1–2 sentences max).
+Use lots of bullet points.
+Bold important terms with <strong>.
+Add clear subheadings.
+Do NOT include <style>, <script>, or external links.
+
+CONTENT:
+${rawText}
+`
+
+            }
+          ]
+        }
+      ]
+    })
+  });
+
+  const data = await response.json();
+  console.log("Gemini says:", data);
+
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (text) return text;
+
+  throw new Error("AI response failed: " + JSON.stringify(data));
 }
-// 2. THIS IS YOUR TEST - It runs automatically when you start the file
-console.log("--- AI TEST STARTING ---");
-processArticle("The University of California, Santa Barbara is a leading research university.")
-  .then(summary => {
-    console.log("AI SAYS:", summary);
-    console.log("--- TEST SUCCESSFUL ---");
-  })
-  .catch(err => console.error("TEST FAILED:", err));
