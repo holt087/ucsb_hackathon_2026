@@ -50,3 +50,119 @@ body.lh-blur-on .lh-img-highlight::before {
     z-index: 1000001;
     filter: none !important;
 }
+.lh-locked {
+  outline: 4px solid #228be6 !important;
+  outline-offset: 6px !important; /* optional but looks nicer */
+}
+#lh-progress-wrap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 6px;
+  z-index: 2147483647;
+  background: rgba(0,0,0,0.18);
+}
+
+#lh-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: #228be6;
+  transition: width 0.1s linear;
+}
+
+img.lh-img-highlight,
+figure.lh-img-highlight {
+  padding: 12px !important;
+  font-size: initial !important;
+  line-height: initial !important;
+  width: auto !important;
+  box-sizing: border-box !important;
+  transform: scale(var(--lh-zoom-level, 1.0)) !important;
+}
+
+figure.lh-img-highlight img,
+img.lh-img-highlight {
+  max-width: 100% !important;
+  height: auto !important;
+  object-fit: contain !important;
+  border-radius: 12px !important; /* optional */
+}
+
+body.lh-blur-on .lh-highlight::before,
+body.lh-blur-on .lh-img-highlight::before {
+  content: "";
+  position: fixed;
+  top: -5000px; left: -5000px; right: -5000px; bottom: -5000px;
+  z-index: -1 !important;
+  backdrop-filter: blur(var(--lh-blur-size, 12px)) !important;
+  -webkit-backdrop-filter: blur(var(--lh-blur-size, 12px)) !important;
+  pointer-events: none;
+}
+
+
+.color-picker {
+   display: flex;
+   gap: 16px; /* space between background & text buttons */
+   justify-content: center;
+   margin-top: 10px;
+}
+
+
+/* Each button with its title stacked */
+.color-btn-container {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+}
+
+
+/* Title above the buttons */
+.color-btn-title {
+   font-size: 12px;
+   font-weight: 600;
+   margin-bottom: 6px;
+   color: #1a1a1a;
+}
+
+
+/* Circular color buttons */
+.color-btn {
+   width: 70px;                
+   height: 70px;
+   border-radius: 50%; /* circular */
+   border: 2px solid #ccc;
+   cursor: pointer;
+   background-color: #fff;
+   transition: transform 0.2s, border-color 0.2s;
+}
+
+
+.color-btn:hover {
+   transform: scale(1.05);
+   border-color: #228be6;  /* highlight on hover */
+}
+
+
+/* Reset button */
+#reset-colors {
+   margin-top: 10px;
+   padding: 8px 16px;
+   font-size: 13px;
+   font-weight: 600;
+   border: none;
+   border-radius: 6px;
+   cursor: pointer;
+   background-color: #228be6;   /* blue background */
+   color: white;                 /* white text */
+   transition: background-color 0.2s;
+}
+
+
+#reset-colors:hover {
+   background-color: #1c7ed6;   /* darker blue on hover */
+}
+
+
+
+
