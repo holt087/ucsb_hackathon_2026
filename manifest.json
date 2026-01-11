@@ -1,15 +1,21 @@
 {
   "manifest_version": 3,
   "name": "Lighthouse",
-  "version": "1.6.0",
+  "version": "2.1.0",
   "description": "Illuminate your reading. Hover to enlarge text and blur distractions for an enhanced web experience.",
   "permissions": ["storage", "activeTab"],
   "action": {
     "default_popup": "popup.html"
   },
-    "icons": {
+  "icons": {
     "128": "icon.png"
   },
+  "web_accessible_resources": [
+    {
+      "resources": ["OpenDyslexic-Regular.otf"],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
