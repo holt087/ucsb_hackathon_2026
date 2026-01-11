@@ -1,3 +1,14 @@
+function getMainContainer() {
+  return document.querySelector("#mw-content-text")     // Wikipedia body
+    || document.querySelector("#content")              // Wikipedia content wrapper
+    || document.querySelector("article")
+    || document.querySelector("main")
+    || document.querySelector("#main")
+    || document.querySelector(".post")
+    || document.body;
+}
+
+
 // 1. Simple Ad Blocker
 let locked = false;
 
@@ -20,20 +31,34 @@ chrome.storage.local.get(['lighthouseEnabled', 'blurEnabled', 'blurAmount'], (re
     isEnabled = res.lighthouseEnabled !== false;
     isBlurEnabled = res.blurEnabled !== false;
     blurAmount = res.blurAmount || 12;
+
+    if (isEnabled) {
+    ensureProgressBar();
+    updateProgress();
+  }
+
 });
 
 // Message listener from Popup
 chrome.runtime.onMessage.addListener((req) => {
-    if (req.action === "toggle") isEnabled = req.status;
-    if (req.action === "toggleBlur") isBlurEnabled = req.status;
-    if (req.action === "updateBlurAmount") blurAmount = req.status;
-    
+  if (req.action === "toggle") {
+    isEnabled = req.status;
     if (!isEnabled) {
-        clearLighthouse();
-    } else if (currentTarget) {
-        updateLiveStyles();
+      clearLighthouse();
+      removeProgressBar();
+    } else {
+      ensureProgressBar();
+      updateProgress();
+      updateLiveStyles();
     }
+  }
+
+  if (req.action === "toggleBlur") isBlurEnabled = req.status;
+  if (req.action === "updateBlurAmount") blurAmount = req.status;
+
+  if (isEnabled) updateLiveStyles();
 });
+
 
 function updateLiveStyles() {
     if (isBlurEnabled) {
@@ -82,6 +107,17 @@ document.addEventListener('mousemove', (e) => {
     }
 });
 
+window.addEventListener("scroll", () => {
+  if (!isEnabled) return;
+  updateProgress();
+}, { passive: true });
+
+window.addEventListener("resize", () => {
+  if (!isEnabled) return;
+  updateProgress();
+});
+
+
 function clearLighthouse() {
     if (locked) return;
     if (currentTarget) {
@@ -90,6 +126,61 @@ function clearLighthouse() {
     }
     document.body.classList.remove('lh-blur-on');
 }
+
+function ensureProgressBar() {
+  if (document.getElementById("lh-progress-wrap")) return;
+
+  const wrap = document.createElement("div");
+  wrap.id = "lh-progress-wrap";
+  wrap.style.position = "fixed";
+  wrap.style.top = "0";
+  wrap.style.left = "0";
+  wrap.style.width = "100vw";
+  wrap.style.height = "6px";
+  wrap.style.zIndex = "2147483647";
+  wrap.style.background = "rgba(0,0,0,0.15)";
+
+  const bar = document.createElement("div");
+  bar.id = "lh-progress-bar";
+  bar.style.height = "100%";
+  bar.style.width = "0%";
+  bar.style.background = "#228be6";
+  bar.style.transition = "width 0.1s linear";
+
+  wrap.appendChild(bar);
+  document.documentElement.appendChild(wrap);
+}
+
+function removeProgressBar() {
+  document.getElementById("lh-progress-wrap")?.remove();
+}
+
+function updateProgress() {
+  const main = getMainContainer();
+  if (!main) return;
+
+  // Where the content starts in the document
+  const startY = window.scrollY + main.getBoundingClientRect().top;
+
+  // How tall the content actually is (scrollable height)
+  const contentHeight =
+    (main === document.body || main === document.documentElement)
+      ? document.documentElement.scrollHeight
+      : main.scrollHeight;
+
+  // How far the viewport has moved through the content
+  const viewportBottom = window.scrollY + window.innerHeight;
+  const current = viewportBottom - startY;
+
+  let pct = (current / contentHeight) * 100;
+  pct = Math.max(0, Math.min(100, pct));
+
+  const bar = document.getElementById("lh-progress-bar");
+  if (bar) bar.style.width = pct.toFixed(1) + "%";
+}
+
+
+
 
 document.addEventListener("click", (e) => {
     if (!isEnabled || !currentTarget) return;
@@ -115,4 +206,6 @@ document.addEventListener("keydown", (e) => {
         lockedTarget = null;
     }
 });
+
+
 
