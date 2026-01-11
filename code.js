@@ -5,24 +5,25 @@ const removeAds = () => {
 };
 setInterval(removeAds, 2000);
 
-// 2. Lighthouse Logic
+// 2. State management
 let isEnabled = true;
 let isBlurEnabled = true;
-let blurAmount = 12; 
+let blurAmount = 10; 
+let zoomAmount = 1.0;
 let currentTarget = null;
 
-// Initial state load
-chrome.storage.local.get(['lighthouseEnabled', 'blurEnabled', 'blurAmount'], (res) => {
+chrome.storage.local.get(['lighthouseEnabled', 'blurEnabled', 'blurAmount', 'zoomAmount'], (res) => {
     isEnabled = res.lighthouseEnabled !== false;
     isBlurEnabled = res.blurEnabled !== false;
-    blurAmount = res.blurAmount || 12;
+    blurAmount = res.blurAmount !== undefined ? res.blurAmount : 10;
+    zoomAmount = res.zoomAmount !== undefined ? res.zoomAmount : 1.0;
 });
 
-// Message listener from Popup
 chrome.runtime.onMessage.addListener((req) => {
     if (req.action === "toggle") isEnabled = req.status;
     if (req.action === "toggleBlur") isBlurEnabled = req.status;
     if (req.action === "updateBlurAmount") blurAmount = req.status;
+    if (req.action === "updateZoomAmount") zoomAmount = req.status;
     
     if (!isEnabled) {
         clearLighthouse();
@@ -32,9 +33,11 @@ chrome.runtime.onMessage.addListener((req) => {
 });
 
 function updateLiveStyles() {
-    if (isBlurEnabled) {
+    document.documentElement.style.setProperty('--lh-zoom-level', zoomAmount);
+    document.documentElement.style.setProperty('--lh-blur-size', blurAmount + 'px');
+
+    if (isBlurEnabled && isEnabled) {
         document.body.classList.add('lh-blur-on');
-        document.documentElement.style.setProperty('--lh-blur-size', blurAmount + 'px');
     } else {
         document.body.classList.remove('lh-blur-on');
     }
@@ -42,10 +45,18 @@ function updateLiveStyles() {
 
 document.addEventListener('mouseover', (e) => {
     if (!isEnabled) return;
-    const target = e.target.closest('p');
     
-    if (target && target !== currentTarget && target.innerText.length > 20) {
-        if (currentTarget) currentTarget.classList.remove('lh-highlight');
+    // Check for paragraph or image
+    const target = e.target.closest('p, img');
+    
+    if (target && target !== currentTarget) {
+        // Validation: skip very short text snippets, but always allow images
+        if (target.tagName.toLowerCase() === 'p' && target.innerText.length <= 20) return;
+
+        if (currentTarget) {
+            currentTarget.classList.remove('lh-highlight', 'lh-img-highlight');
+        }
+        
         currentTarget = target;
         
         const style = window.getComputedStyle(target);
@@ -57,7 +68,13 @@ document.addEventListener('mouseover', (e) => {
 
         target.style.setProperty('--lh-bg', bgColor);
         target.style.setProperty('--lh-text', style.color);
-        target.classList.add('lh-highlight');
+
+        // Apply specific class based on type
+        if (target.tagName.toLowerCase() === 'img') {
+            target.classList.add('lh-img-highlight');
+        } else {
+            target.classList.add('lh-highlight');
+        }
         
         updateLiveStyles();
     }
@@ -76,7 +93,7 @@ document.addEventListener('mousemove', (e) => {
 
 function clearLighthouse() {
     if (currentTarget) {
-        currentTarget.classList.remove('lh-highlight');
+        currentTarget.classList.remove('lh-highlight', 'lh-img-highlight');
         currentTarget = null;
     }
     document.body.classList.remove('lh-blur-on');
